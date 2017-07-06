@@ -1,0 +1,47 @@
+On a 3 classes:
+
+	1. classe Avion:
+		int id;
+		String nom;
+		String depart;
+		String arrivee;
+		double cap;
+		double position_x,position_y,position_z;
+		double positionArrivee_x,positionArrivee_y,positionArrivee_z;
+		double altitude;
+		double vitesse_x,vitess_y,vitesse_z;
+		double acceleration;
+
+	2.classe Saca:
+		
+	3.classe Radar:
+		int intervaleTemps;
+	
+	4.classe Controle:
+		double changementCap();
+		double changementAltitude();
+		double changementVitesse();
+
+
+Avion<-->SACA : socket tcp
+
+Avion<-->SACA<-->controle
+
+chaque avion => 1 controle
+
+
+Etapes:
+1. lancer un Avion
+2. Avion contacte SACA
+3. Avion se déclare
+4. SACA envoie information au Radar
+5. Radar affiche les informations
+6. SACA contacte le Controle
+7. le Controle fait le calcul nécessaire
+8. le Controle transmet au SACA le résultat
+9. SACA transmet ce résultat à l'avion (changements cap, altitudes, vitesse)
+11. SACA transmet ce résultat aussi au Radar
+12. Radar modifie ses données et les affiches
+13. attendre un intervalle de temps
+14. Avion envoie au SACA sa position
+15. répéter depuis l'étape 6
