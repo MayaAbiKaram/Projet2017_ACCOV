@@ -17,6 +17,7 @@ public class Saca1 {
         Radar r = new Radar();
         Saca c = new Saca(r);
         c.start();
+        
     }
     
 }

@@ -64,36 +64,37 @@ public class Avion {
         return 0;
     }
     
-    void traitement(Socket clientSocket)throws Exception{
-        
-        PrintWriter outToSaca = new PrintWriter(clientSocket.getOutputStream());
-        BufferedReader inFromSaca = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        
-        outToSaca.println(id + "/" + nom + "/" + arrivee_x + "/" + arrivee_y + "/" + arrivee_z ); //evoie id/nom/arrivee
-        outToSaca.flush();
-        
-        while(true){
-            String [] s = inFromSaca.readLine().split("/"); //vitesse/cap/altitude
-            int res = modification(Double.parseDouble(s[0]),Double.parseDouble(s[1]),Double.parseDouble(s[2]),Double.parseDouble(s[3]),Double.parseDouble(s[4]));
-            if(res == -1){
-                outToSaca.println(position_x + "/" + position_y + "/" + position_z + "/end");
-                outToSaca.flush();
-                break;
-            }
-            sleep(INTERVALLE);
-            
-            outToSaca.println(position_x + "/" + position_y + "/" + position_z);
+    void traitement(Socket clientSocket){
+        try{
+            PrintWriter outToSaca = new PrintWriter(clientSocket.getOutputStream());
+            BufferedReader inFromSaca = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            outToSaca.println(id + "/" + nom + "/" + arrivee_x + "/" + arrivee_y + "/" + arrivee_z ); //evoie id/nom/arrivee
             outToSaca.flush();
-        }
-        outToSaca.close();
-        inFromSaca.close();
-        clientSocket.close();
+
+            while(true){
+                String [] s = inFromSaca.readLine().split("/"); //vitesse/cap/altitude
+                int res = modification(Double.parseDouble(s[0]),Double.parseDouble(s[1]),Double.parseDouble(s[2]),Double.parseDouble(s[3]),Double.parseDouble(s[4]));
+                if(res == -1){
+                    outToSaca.println(position_x + "/" + position_y + "/" + position_z + "/end");
+                    outToSaca.flush();
+                    break;
+                }
+                sleep(INTERVALLE);
+
+                outToSaca.println(position_x + "/" + position_y + "/" + position_z);
+                outToSaca.flush();
+            }
+            outToSaca.close();
+            inFromSaca.close();
+        }catch(Exception e){System.out.println("arret d'execution"); System.exit(0);}
     }
     
     public void start ()throws Exception{
         
         Socket clientSocket = new Socket(hostName,portNumber);
         traitement(clientSocket);
+        clientSocket.close();
    
     }   
 }
