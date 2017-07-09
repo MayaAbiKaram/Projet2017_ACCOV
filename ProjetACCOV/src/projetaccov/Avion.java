@@ -9,18 +9,24 @@ package projetaccov;
  *
  * @author Maya
  */
+
+import java.io.*;
+import static java.lang.Thread.sleep;
+import java.net.*;
+
 public class Avion {
-    static final int INTERVALLE = 3; //secondes
+    static final int INTERVALLE = 3000;//millisecondes
+    static final String hostName = "localhost";
+    static final int portNumber = 350;
     int id;
     String nom;
-    Console c;
     String depart,arrivee;
     double arrivee_x,arrivee_y,arrivee_z;
     double cap,altitude;
     double vitesse_x,vitesse_y,vitesse_z;
     double position_x,position_y,position_z;
     
-    Avion(int id,String nom,String depart,String arrivee, double arrivee_x,double arrivee_y,double arrivee_z,Console c){
+    public Avion(int id,String nom,String depart,String arrivee, double arrivee_x,double arrivee_y,double arrivee_z){
         this.id =id;
         this.nom = nom;
         this.depart = depart;
@@ -28,7 +34,6 @@ public class Avion {
         this.arrivee_x = arrivee_x;
         this.arrivee_y = arrivee_y;
         this.arrivee_z = arrivee_z;
-        this.c = c;
         position_x = 0;
         position_y = 0;
         position_z = 0;
@@ -37,25 +42,58 @@ public class Avion {
         vitesse_z = 0;
         cap = 0;
         altitude = 0;
+        
     }
     
-    void modification(double altitude,double cap,double vitesse_x,double vitesse_y,double vitesse_z){
+    int modification(double vitesse_x,double vitesse_y,double vitesse_z,double cap,double altitude){
         this.vitesse_x = vitesse_x;
         this.vitesse_y = vitesse_y;
         this.vitesse_z = vitesse_z;
         this.cap = cap;
         this.altitude = altitude;
         
-        position_x = (vitesse_x)/INTERVALLE;
-        position_y = (vitesse_y)/INTERVALLE;
-        position_z = (vitesse_z)/INTERVALLE;
+        int in = INTERVALLE/1000; //secondes
+        position_x = position_x + ((vitesse_x)*in);
+        position_y = position_y + ((vitesse_y)*in);
+        position_z = position_z + ((vitesse_z)*in);
         
         if((position_x == arrivee_x) && (position_y == arrivee_y) && (position_z == arrivee_z) ){
             //arrivee a destination
-            //exit socket
+            return -1;
         }
+        return 0;
     }
     
-    //COMMUNICATION SOCKET AVEC SACA
+    void traitement(Socket clientSocket)throws Exception{
+        
+        PrintWriter outToSaca = new PrintWriter(clientSocket.getOutputStream());
+        BufferedReader inFromSaca = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        
+        outToSaca.println(id + "/" + nom + "/" + arrivee_x + "/" + arrivee_y + "/" + arrivee_z ); //evoie id/nom/arrivee
+        outToSaca.flush();
+        
+        while(true){
+            String [] s = inFromSaca.readLine().split("/"); //vitesse/cap/altitude
+            int res = modification(Double.parseDouble(s[0]),Double.parseDouble(s[1]),Double.parseDouble(s[2]),Double.parseDouble(s[3]),Double.parseDouble(s[4]));
+            if(res == -1){
+                outToSaca.println(position_x + "/" + position_y + "/" + position_z + "/end");
+                outToSaca.flush();
+                break;
+            }
+            sleep(INTERVALLE);
+            
+            outToSaca.println(position_x + "/" + position_y + "/" + position_z);
+            outToSaca.flush();
+        }
+        outToSaca.close();
+        inFromSaca.close();
+        clientSocket.close();
+    }
     
+    public void start ()throws Exception{
+        
+        Socket clientSocket = new Socket(hostName,portNumber);
+        traitement(clientSocket);
+   
+    }   
 }
