@@ -18,7 +18,8 @@ public class Avion {
     static final int INTERVALLE = 3000;//millisecondes
     static final String hostName = "localhost";
     static final int portNumber = 350;
-    int id;
+    static final int VITMIN = 200;
+    int id; //numero du vol
     String nom;
     String depart,arrivee;
     double arrivee_x,arrivee_y,arrivee_z;
@@ -51,11 +52,37 @@ public class Avion {
         this.vitesse_z = vitesse_z;
         this.cap = cap;
         this.altitude = altitude;
+    
         
-        int in = INTERVALLE/1000; //secondes
-        position_x = position_x + ((vitesse_x)*in);
-        position_y = position_y + ((vitesse_y)*in);
-        position_z = position_z + ((vitesse_z)*in);
+        double cosinus, sinus, tang;
+        double dep_x, dep_y, dep_z;
+
+        cosinus = Math.cos(cap * 2 * Math.PI / 360);
+        sinus = Math.sin(cap * 2 * Math.PI / 360);
+        tang = Math.tan(cap * 2 * Math.PI/360);
+
+        //newPOS = oldPOS + Vt
+        dep_x = cosinus * vitesse_x * 10 / VITMIN;
+        dep_y = sinus * vitesse_y * 10 / VITMIN;
+        dep_z = tang * vitesse_z * 10/ VITMIN;
+
+        // on se d�place d'au moins une case quels que soient le cap et la vitesse
+        // sauf si cap est un des angles droit
+        if ((dep_x > 0) && (dep_x < 1)) dep_x = 1;
+        if ((dep_x < 0) && (dep_x > -1)) dep_x = -1;
+
+        if ((dep_y > 0) && (dep_y < 1)) dep_y = 1;
+        if ((dep_y < 0) && (dep_y > -1)) dep_y = -1;
+        
+        if ((dep_z > 0) && (dep_z < 1)) dep_z = 1;
+        if ((dep_z < 0) && (dep_z > -1)) dep_z = -1;
+
+        //printf(" x : %f y : %f\n", dep_x, dep_y);
+
+        position_x = position_x + (int) dep_x;
+        position_y = position_y + (int) dep_y;
+        position_z = position_z + (int) dep_z;
+       
         
         if((position_x == arrivee_x) && (position_y == arrivee_y) && (position_z == arrivee_z) ){
             //arrivee a destination
